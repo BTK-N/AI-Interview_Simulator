@@ -128,12 +128,29 @@ def submit_answer(
     """Evaluates a single answered question using speech metrics and OpenRouter LLM."""
     db_session = db.query(DBSession).filter(DBSession.id == session_id).first()
     if not db_session:
-        raise HTTPException(status_code=404, detail="Session not found")
+        if session_id.startswith("sess-sim") or session_id.startswith("sess-demo"):
+            db_session = DBSession(
+                id=session_id,
+                role_id="software_engineer",
+                role_title="Principal Distributed Systems Architect",
+                language="en",
+                status="in_progress",
+                is_demo=1
+            )
+            db.add(db_session)
+            db.commit()
+            db.refresh(db_session)
+        else:
+            raise HTTPException(status_code=404, detail="Session not found")
         
     data = load_questions_data()
     q_data = next((q for q in data.get("questions", []) if q["id"] == sub.question_id), None)
     if not q_data:
-        raise HTTPException(status_code=404, detail="Question not found")
+        role_qs = [q for q in data.get("questions", []) if q.get("role") == db_session.role_id]
+        if role_qs:
+            q_data = role_qs[0]
+        else:
+            raise HTTPException(status_code=404, detail="Question not found")
         
     lang = sub.language or db_session.language or "en"
     

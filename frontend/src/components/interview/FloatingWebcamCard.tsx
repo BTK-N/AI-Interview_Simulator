@@ -35,6 +35,11 @@ export const FloatingWebcamCard: React.FC<FloatingWebcamCardProps> = ({
   const [yaw] = useState<number>(-0.4);
   const { updateVisionTelemetry, setHardwareStatus } = useSessionStore();
 
+  const onStreamReadyRef = useRef(onStreamReady);
+  useEffect(() => {
+    onStreamReadyRef.current = onStreamReady;
+  }, [onStreamReady]);
+
   // Initialize camera stream
   useEffect(() => {
     let activeStream: MediaStream | null = null;
@@ -64,7 +69,7 @@ export const FloatingWebcamCard: React.FC<FloatingWebcamCardProps> = ({
           frameRate,
         });
 
-        onStreamReady?.(mediaStream);
+        onStreamReadyRef.current?.(mediaStream);
       } catch (err) {
         console.warn('[FloatingWebcam] Camera permission denied:', err);
         setHasCamera(false);
@@ -75,11 +80,12 @@ export const FloatingWebcamCard: React.FC<FloatingWebcamCardProps> = ({
     startCamera();
 
     return () => {
+      console.log('[FloatingWebcam] Stopping active stream tracks (cleanup)');
       if (activeStream) {
         activeStream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [onStreamReady, setHardwareStatus]);
+  }, [setHardwareStatus]);
 
   // MediaPipe Frame Analysis Loop (Throttled strictly to 2000ms intervals during recording)
   useEffect(() => {

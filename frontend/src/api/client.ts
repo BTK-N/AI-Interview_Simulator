@@ -71,7 +71,7 @@ export async function submitAnswer(
     audio_filler_count?: number;
   }
 ): Promise<QuestionEvaluation> {
-  const res = await fetch(`${API_BASE}/sessions/${sessionId}/submit-answer`, {
+  const res = await fetch(`${API_BASE}/sessions/${sessionId}/evaluate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

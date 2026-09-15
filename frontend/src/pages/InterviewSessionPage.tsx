@@ -65,6 +65,10 @@ export const InterviewSessionPage: React.FC<InterviewSessionPageProps> = ({
   } = useSessionStore();
 
   const [activeStream, setActiveStream] = useState<MediaStream | null>(null);
+
+  const handleStreamReady = useCallback((st: MediaStream) => {
+    setActiveStream(st);
+  }, []);
   const [isSpeakingQuestion, setIsSpeakingQuestion] = useState<boolean>(false);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
@@ -493,7 +497,7 @@ export const InterviewSessionPage: React.FC<InterviewSessionPageProps> = ({
             <div className="lg:col-span-5 flex flex-col">
               <FloatingWebcamCard
                 isRecording={isRecording}
-                onStreamReady={(st) => setActiveStream(st)}
+                onStreamReady={handleStreamReady}
                 className="flex-1"
               />
             </div>
