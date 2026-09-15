@@ -1,0 +1,90 @@
+{
+  "session_id": "sess-sim-exec-782",
+  "role_id": "software_engineer",
+  "role_title": "Principal Distributed Systems Architect",
+  "created_at": "Sep 15, 2026",
+  "total_questions": 3,
+  "overall_score": 89.2,
+  "content_score": 93.5,
+  "clarity_score": 86.0,
+  "confidence_score": 88.5,
+  "top_strengths": [
+    "Articulated concrete architectural primitives (idempotency keys, atomic Redis leases) before discussing failure topologies.",
+    "Clear delineation of transient fault tolerances versus poison pill dead-letter queuing.",
+    "Maintained continuous eye gaze within the optical reticle zone throughout complex architectural explanations."
+  ],
+  "top_weaknesses": [
+    "Recorded 5 hesitation markers (\"um\", \"basically\") during transitions between storage and concurrency layers.",
+    "Spoken tempo accelerated to 152 WPM when explaining GC pause heuristics, slightly impacting cadence clarity."
+  ],
+  "actionable_recommendations": [
+    "Replace vocalized pauses with silent, deliberate breath pauses to enhance executive authority.",
+    "Lead with high-level system boundaries and SLA invariants before descending into concurrency primitives."
+  ],
+  "per_question_results": [
+    {
+      "question_id": "q-1",
+      "question_text": "Describe how you architect an event-driven microservices pipeline with idempotent consumers and dead-letter queues.",
+      "transcript": "In an event-driven architecture, um, we basically ensure idempotency by generating a deterministic UUID per event payload. Consumers, uh, write this idempotency key to Redis with an atomic lease, like, before executing domain logic. For failure handling, basically unrecoverable errors trigger exponential retry and dead-letter queues.",
+      "relevance_score": 94,
+      "completeness_score": 92,
+      "structure_score": 93,
+      "content_score": 93,
+      "words_count": 52,
+      "wpm": 134,
+      "filler_words": { "um": 1, "basically": 2, "uh": 1, "like": 1 },
+      "filler_total": 5,
+      "clarity_score": 86,
+      "confidence_score": 92,
+      "overall_question_score": 91,
+      "feedback": "Decisive technical rationale. Seamlessly connected system primitives to fault tolerance boundaries with minimal preamble.",
+      "improvement_tips": [
+        "State high-level architectural invariants before descending into concurrency specifics.",
+        "Eliminate conversational intensifiers like \"basically\" to project definitive command."
+      ],
+      "model_answer": "An event-driven architecture leverages unique message identifiers as idempotency keys, durable partitioned brokers, dead-letter exchanges for unrecoverable errors, and outbox patterns to guarantee consistency."
+    },
+    {
+      "question_id": "q-2",
+      "question_text": "How do you diagnose and resolve an intermittent memory leak in a high-throughput backend service under production load?",
+      "transcript": "I systematically capture heap snapshots during baseline and peak usage, inspect retained object graphs, examine event emitter bindings, and monitor GC pause times via Prometheus metrics.",
+      "relevance_score": 92,
+      "completeness_score": 89,
+      "structure_score": 91,
+      "content_score": 91,
+      "words_count": 32,
+      "wpm": 138,
+      "filler_words": {},
+      "filler_total": 0,
+      "clarity_score": 90,
+      "confidence_score": 87,
+      "overall_question_score": 90,
+      "feedback": "Systematic triage methodology. Addressed profiling tools, GC runtime telemetry, and retained object hierarchies cleanly.",
+      "improvement_tips": [
+        "Discuss memory headroom and automated circuit breakers to protect upstream shards during diagnosis."
+      ],
+      "model_answer": "I systematically capture heap snapshots during baseline and peak usage, inspect retained object graphs, examine event emitter bindings, and monitor GC pause times via Prometheus metrics."
+    },
+    {
+      "question_id": "q-3",
+      "question_text": "Describe a situation where you had to push back on an executive deadline due to architectural technical debt.",
+      "transcript": "I framed the risk in terms of customer SLA violations and MTTR impact, presented a phased delivery compromise, and secured buy-in for refactoring foundational storage bottlenecks.",
+      "relevance_score": 88,
+      "completeness_score": 85,
+      "structure_score": 87,
+      "content_score": 87,
+      "words_count": 31,
+      "wpm": 129,
+      "filler_words": { "like": 1 },
+      "filler_total": 1,
+      "clarity_score": 84,
+      "confidence_score": 86,
+      "overall_question_score": 86,
+      "feedback": "Constructive stakeholder negotiation grounded in operational metrics rather than subjective engineering purity.",
+      "improvement_tips": [
+        "Quantify the dollar or latency impact when negotiating engineering trade-offs with business leaders."
+      ],
+      "model_answer": "I framed the risk in terms of customer SLA violations and MTTR impact, presented a phased delivery compromise, and secured buy-in for refactoring foundational storage bottlenecks."
+    }
+  ]
+}

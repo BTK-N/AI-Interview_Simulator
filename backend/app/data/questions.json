@@ -1,0 +1,140 @@
+{
+  "roles": [
+    {
+      "id": "software_engineer",
+      "title": "Software Engineer",
+      "description": "Full-stack, backend, frontend, algorithms and behavioral interview for developers."
+    },
+    {
+      "id": "marketing_executive",
+      "title": "Marketing Executive",
+      "description": "Digital marketing, brand campaigns, content strategy and stakeholder communication."
+    },
+    {
+      "id": "hr_general",
+      "title": "HR & General Professional",
+      "description": "Human resources, talent management, interpersonal dynamics and workplace problem-solving."
+    }
+  ],
+  "questions": [
+    {
+      "id": "swe_tech_01",
+      "role": "software_engineer",
+      "type": "technical",
+      "difficulty": "easy",
+      "question": "Can you explain the core principles of Object-Oriented Programming (OOP) and give a brief real-world example of Polymorphism?",
+      "question_ur": "کیا آپ آبجیکٹ اورینٹڈ پروگرامنگ (OOP) کے بنیادی اصول بیان کر سکتے ہیں اور پولیمورفزم کی ایک حقیقی مثال دے سکتے ہیں؟",
+      "expected_points": [
+        "Mention the 4 pillars: Encapsulation, Abstraction, Inheritance, Polymorphism",
+        "Explain Polymorphism: ability for different objects to respond to the same method call in different ways",
+        "Provide a concrete real-world example (e.g. Shape base class with draw() method, or Payment base class with pay() method)"
+      ],
+      "model_answer": "The four fundamental principles of OOP are Encapsulation (bundling data and methods), Abstraction (hiding complex internal details), Inheritance (reusing code across related classes), and Polymorphism (many forms). Polymorphism allows objects of different classes to respond to the same method in ways specific to their type, such as a base class 'Payment' with subclasses 'CardPayment' and 'EasyPaisaPayment' each implementing 'pay()' differently.",
+      "time_limit_sec": 60
+    },
+    {
+      "id": "swe_tech_02",
+      "role": "software_engineer",
+      "type": "technical",
+      "difficulty": "medium",
+      "question": "What is the difference between SQL and NoSQL databases, and when would you choose one over the other?",
+      "question_ur": "ایس کیو ایل (SQL) اور نو ایس کیو ایل (NoSQL) ڈیٹا بیس میں کیا فرق ہے، اور آپ ایک پر دوسرے کو کب ترجیح دیں گے؟",
+      "expected_points": [
+        "SQL: Relational, rigid schema, ACID compliant, vertical scaling (e.g., PostgreSQL, MySQL)",
+        "NoSQL: Non-relational, flexible schema, BASE consistency, horizontal scaling (e.g., MongoDB, Redis)",
+        "Use cases: SQL for transactions, financial, structured relationships; NoSQL for rapidly evolving schemas, high write-throughput"
+      ],
+      "model_answer": "SQL databases are relational with structured schemas and ACID guarantees, making them ideal for financial transactions and complex joins. NoSQL databases are non-relational with flexible schemas designed for horizontal scaling, making them best for unstructured big data and fast iterative schemas.",
+      "time_limit_sec": 75
+    },
+    {
+      "id": "swe_tech_03",
+      "role": "software_engineer",
+      "type": "technical",
+      "difficulty": "hard",
+      "question": "How do you handle API rate limiting in a distributed microservices environment?",
+      "question_ur": "تقسیم شدہ مائیکروسروسز ماحول میں آپ API ریٹ لمٹنگ کو کیسے ہینڈل کرتے ہیں؟",
+      "expected_points": [
+        "Rate limiting algorithms (Token Bucket, Leaky Bucket, Sliding Window)",
+        "Centralized state store (like Redis) for tracking counts across instances",
+        "HTTP 429 Too Many Requests response with Retry-After header"
+      ],
+      "model_answer": "In distributed microservices, rate limiting is handled at the API Gateway layer using algorithms like Token Bucket or Sliding Window Log with centralized storage in Redis. Exceeded quotas return HTTP 429 Too Many Requests with Retry-After headers.",
+      "time_limit_sec": 90
+    },
+    {
+      "id": "swe_behav_01",
+      "role": "software_engineer",
+      "type": "behavioral",
+      "difficulty": "medium",
+      "question": "Tell me about a time you faced a difficult technical bug in production. How did you diagnose and resolve it?",
+      "question_ur": "مجھے کسی ایسے واقعے کے بارے میں بتائیں جب آپ کو پروڈکشن میں کسی مشکل تکنیکی بگ کا سامنا ہوا ہو۔ آپ نے اس کی تشخیص اور حل کیسے کیا؟",
+      "expected_points": [
+        "Use STAR method (Situation, Task, Action, Result)",
+        "Describe systematic debugging (logs, reproducing issue, monitoring)",
+        "Explain root cause fix and post-mortem preventative measures"
+      ],
+      "model_answer": "In my previous project, we experienced intermittent 504 timeouts on checkout. I analyzed logs, found database connection pool leaks in a checkout module, released connections safely in a finally block, and restored latency to under 200ms while adding automated tests.",
+      "time_limit_sec": 90
+    },
+    {
+      "id": "swe_behav_02",
+      "role": "software_engineer",
+      "type": "behavioral",
+      "difficulty": "easy",
+      "question": "How do you handle a situation where a teammate disagrees with your architectural design or code review feedback?",
+      "question_ur": "جب ٹیم کا کوئی رکن آپ کے آرکیٹیکچرل ڈیزائن یا کوڈ ریویو فیڈ بیک سے متفق نہ ہو تو آپ اس صورتحال سے کیسے نمٹتے ہیں؟",
+      "expected_points": [
+        "Focus on technical merits and data rather than ego",
+        "Active listening and understanding the other perspective",
+        "Finding common ground or consulting senior engineers / benchmarks"
+      ],
+      "model_answer": "I focus the conversation on objective metrics—such as maintainability, testability, and performance benchmarks—rather than personal preferences. If there is ambiguity, we build a quick prototype or seek lead input, and once a decision is made, I commit fully.",
+      "time_limit_sec": 60
+    },
+    {
+      "id": "mkt_01",
+      "role": "marketing_executive",
+      "type": "technical",
+      "difficulty": "medium",
+      "question": "How would you measure the Return on Investment (ROI) of an organic social media campaign compared to paid ad campaigns?",
+      "question_ur": "آپ پیڈ اشتہاری مہمات کے مقابلے میں آرگینک سوشل میڈیا مہم کے آر او آئی (ROI) کی پیمائش کیسے کریں گے؟",
+      "expected_points": [
+        "Distinguish between paid ad metrics (CAC, ROAS) and organic metrics (engagement, referral traffic, share of voice)",
+        "Attribution modeling and customer lifetime value (LTV)"
+      ],
+      "model_answer": "For paid ads, ROI is measured through direct ROAS and CAC. For organic social, we track UTM referral traffic, lead conversions, and brand search uplift, evaluating overall customer lifetime value against content production costs.",
+      "time_limit_sec": 75
+    },
+    {
+      "id": "hr_01",
+      "role": "hr_general",
+      "type": "behavioral",
+      "difficulty": "easy",
+      "question": "Why do you want to join our organization, and what unique strengths do you bring to this role?",
+      "question_ur": "آپ ہماری تنظیم میں کیوں شامل ہونا چاہتے ہیں، اور اس کردار کے لیے آپ کی کون سی منفرد خوبیاں ہیں؟",
+      "expected_points": [
+        "Demonstrate research and alignment with company mission / values",
+        "Highlight 2-3 specific relevant strengths backed by past experience",
+        "Articulate forward-looking enthusiasm for growth and impact"
+      ],
+      "model_answer": "I admire your company's mission to democratize education. I bring strong technical fundamentals, proactive problem-solving, and empathetic communication, having previously improved cross-functional onboarding by 30%.",
+      "time_limit_sec": 60
+    },
+    {
+      "id": "hr_02",
+      "role": "hr_general",
+      "type": "behavioral",
+      "difficulty": "medium",
+      "question": "Describe a situation where you had to manage conflicting priorities and tight deadlines. How did you prioritize your workload?",
+      "question_ur": "ایسی صورتحال بیان کریں جہاں آپ کو متضاد ترجیحات اور سخت ڈیڈ لائنز کو سنبھالنا پڑا۔ آپ نے اپنے کام کی ترجیح کیسے طے کی؟",
+      "expected_points": [
+        "Systematic prioritization framework (Urgent vs Important)",
+        "Proactive stakeholder communication and managing expectations",
+        "Successful delivery and lessons learned"
+      ],
+      "model_answer": "I used the Eisenhower Matrix to isolate mission-critical deliverables, communicated early with stakeholders to renegotiate non-critical tickets, and time-boxed deep work sessions to deliver the project on time.",
+      "time_limit_sec": 75
+    }
+  ]
+}

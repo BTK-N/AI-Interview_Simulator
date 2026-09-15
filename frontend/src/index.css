@@ -1,0 +1,217 @@
+/* ==========================================================================
+   GOOGLE FONTS IMPORT
+   - Space Grotesk: Architectural Display & Headings
+   - DM Sans: Geometric Humanist Body & Interface
+   - JetBrains Mono: Tabular Figures & Telemetry Readouts
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+/* ==========================================================================
+   TAILWIND V4 THEME EXTENSIONS (LITERAL VALUES FOR STABLE CLASS GENERATION)
+   ========================================================================== */
+@theme {
+  --color-surface-ground: #080A0F;
+  --color-surface-panel: #0F131C;
+  --color-surface-card: #121724;
+  --color-surface-elevated: rgba(18, 24, 37, 0.75);
+  --color-surface-overlay: rgba(8, 10, 15, 0.88);
+
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-default: rgba(255, 255, 255, 0.12);
+  --color-border-active: rgba(245, 158, 11, 0.45);
+  --color-border-rim: rgba(255, 255, 255, 0.15);
+
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-tertiary: #64748B;
+  --color-text-inverse: #080A0F;
+
+  --color-amber-signal: #F59E0B;
+  --color-amber-subtle: rgba(245, 158, 11, 0.12);
+  --color-amber-glow: rgba(245, 158, 11, 0.25);
+
+  --color-mint-eval: #10B981;
+  --color-mint-subtle: rgba(16, 185, 129, 0.12);
+  --color-mint-glow: rgba(16, 185, 129, 0.25);
+
+  --color-coral-alert: #F43F5E;
+  --color-coral-subtle: rgba(244, 63, 94, 0.12);
+  --color-coral-text: #FB7185;
+
+  --font-display: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* ==========================================================================
+   3-LAYER TOKEN ARCHITECTURE (CSS VARIABLES FOR GSAP / CANVAS / DYNAMIC STYLES)
+   ========================================================================== */
+:root {
+  /* Layer 1: Primitives */
+  --primitive-obsidian-950: #080A0F;
+  --primitive-obsidian-900: #0F131C;
+  --primitive-obsidian-850: #121724;
+  --primitive-obsidian-800: #182030;
+  --primitive-obsidian-700: #232E42;
+
+  --primitive-amber-700: #B45309;
+  --primitive-amber-600: #D97706;
+  --primitive-amber-500: #F59E0B;
+  --primitive-amber-400: #FBBF24;
+  --primitive-amber-300: #FCD34D;
+
+  --primitive-mint-700: #047857;
+  --primitive-mint-600: #059669;
+  --primitive-mint-500: #10B981;
+  --primitive-mint-400: #34D399;
+  --primitive-mint-300: #6EE7B7;
+
+  --primitive-coral-600: #E11D48;
+  --primitive-coral-500: #F43F5E;
+  --primitive-coral-400: #FB7185;
+
+  --font-display: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --motion-duration-instant: 0ms;
+  --motion-duration-fast: 180ms;
+  --motion-duration-normal: 280ms;
+  --motion-duration-slow: 450ms;
+  --motion-duration-reveal: 700ms;
+
+  --motion-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+  --motion-ease-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --motion-ease-linear: linear;
+
+  /* Layer 2: Semantics */
+  --surface-ground: var(--primitive-obsidian-950);
+  --surface-panel: var(--primitive-obsidian-900);
+  --surface-card: var(--primitive-obsidian-850);
+  --surface-elevated: rgba(18, 24, 37, 0.75);
+  --surface-overlay: rgba(8, 10, 15, 0.88);
+
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-default: rgba(255, 255, 255, 0.12);
+  --border-active: rgba(245, 158, 11, 0.45);
+  --border-rim: rgba(255, 255, 255, 0.15);
+
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #64748B;
+  --text-inverse: #080A0F;
+
+  --accent-amber: var(--primitive-amber-500);
+  --accent-amber-subtle: rgba(245, 158, 11, 0.12);
+  --accent-amber-glow: rgba(245, 158, 11, 0.25);
+
+  --accent-mint: var(--primitive-mint-500);
+  --accent-mint-subtle: rgba(16, 185, 129, 0.12);
+  --accent-mint-glow: rgba(16, 185, 129, 0.25);
+
+  --accent-coral: var(--primitive-coral-500);
+  --accent-coral-subtle: rgba(244, 63, 94, 0.12);
+  --accent-coral-text: var(--primitive-coral-400);
+
+  --focus-ring: rgba(245, 158, 11, 0.80);
+
+  /* Layer 3: Components */
+  --cockpit-header-bg: rgba(15, 19, 28, 0.85);
+  --cockpit-panel-bg: rgba(18, 24, 37, 0.85);
+  --reticle-color: var(--accent-amber);
+  --reticle-locked: var(--accent-mint);
+  --waveform-gradient-start: var(--accent-amber);
+  --waveform-gradient-end: var(--accent-mint);
+  --timer-ring-track: rgba(255, 255, 255, 0.08);
+  --timer-ring-fill: var(--accent-amber);
+  --pullquote-border: var(--accent-amber);
+  --pullquote-bg: rgba(245, 158, 11, 0.05);
+}
+
+/* ==========================================================================
+   REDUCED MOTION OVERRIDES (WCAG 2.1 AA)
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration-instant: 0ms;
+    --motion-duration-fast: 0ms;
+    --motion-duration-normal: 0ms;
+    --motion-duration-slow: 0ms;
+    --motion-duration-reveal: 0ms;
+
+    --motion-ease-spring: linear;
+    --motion-ease-out: linear;
+    --motion-ease-overshoot: linear;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   BASE RESETS & CRAFTED UTILITIES
+   ========================================================================== */
+@layer base {
+  body {
+    background-color: var(--surface-ground);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  code, kbd, samp, pre, .font-mono {
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum" 1, "zero" 1;
+  }
+}
+
+.metallic-rim {
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.cockpit-glass {
+  background: rgba(18, 24, 37, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.bg-subtle-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-ground);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}

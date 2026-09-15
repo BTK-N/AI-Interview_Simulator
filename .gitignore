@@ -1,0 +1,50 @@
+# Environment Variables & Secrets
+.env
+*.env
+*.env.local
+*.env.*.local
+
+# Databases & Local Storage
+*.db
+*.sqlite
+*.sqlite3
+backend/interview_simulator.db
+
+# Dependencies
+node_modules/
+.venv/
+env/
+venv/
+
+# Build & Cache Outputs
+dist/
+build/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.cache/
+.pytest_cache/
+
+# IDE & OS Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Internal system logs
+.tempmediaStorage/
+scratch/
+
+# External Datasets & Source Docs
+Data Sets/
+allfiles/
+*.txt
+
+# Agent Skill Configs
+.gemini/
+.agent/
+.agents/
+Skills/
+.skills.json
+skills-lock.json
