@@ -285,5 +285,9 @@ Two independent bugs compounded:
 ### Hardware Context
 Verified on 2-core / 4-thread CPU @ 2.61 GHz. Whisper base int8 inference now runs at ~0.17x realtime — acceptable for interactive use with a ~3s wait per answer.
 
+## Post-Phase 7 Resilience Audit — Camera Lifecycle & Evaluation Pipeline
 
-
+### Issues Resolved
+1. **Camera Flicker on Re-render**: `FloatingWebcamCard.onStreamReady` was passed as an unmemoized inline callback in `InterviewSessionPage.tsx`. Every state transition (countdown timer ticks, recording toggle, transcribing phase) recreated the callback reference, triggering `useEffect` cleanup which invoked `.stop()` on active camera tracks and forced hardware re-acquisition. Resolved by memoizing with `useCallback` in the page and stabilizing callback consumption via `useRef` inside `FloatingWebcamCard`.
+2. **Endpoint Mismatch on Answer Submission**: Frontend `client.ts` previously targeted `/api/sessions/{id}/submit-answer` instead of the actual multimodal evaluation endpoint `/api/sessions/{id}/evaluate`, resulting in silent 404s. Aligned URL to `/api/sessions/{sessionId}/evaluate`.
+3. **OpenRouter Timeout & Heuristic Resilience**: Verified OpenRouter HTTP timeout is set to 12s in `llm_service.py`. When an upstream network delay or rate-limit occurs (e.g. read timeout on `openrouter.ai:443`), the system transparently executes the deterministic Local Heuristic Scorer, ensuring zero candidate pipeline drops and returning structured evaluation within 200ms of timeout.
