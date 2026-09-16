@@ -412,17 +412,21 @@ export const useSessionStore = create<SessionState>()(
       {
         name: 'interview-session-storage',
         partialize: (state) => ({
-          stage: state.stage,
-          sessionId: state.sessionId,
+          // Persist only cross-session-safe fields:
           roleId: state.roleId,
           roleTitle: state.roleTitle,
           language: state.language,
-          questions: state.questions,
-          currentQuestionIndex: state.currentQuestionIndex,
-          evaluations: state.evaluations,
-          overallReport: state.overallReport,
           sessions: state.sessions,
         }),
+        onRehydrateStorage: () => (state) => {
+          if (state) {
+            state.stage = 'idle';
+            state.finalTranscript = '';
+            state.interimTranscript = '';
+            state.evaluations = {};
+            state.timerSeconds = 0;
+          }
+        },
       }
     ),
     { name: 'InterviewSessionFSM' }
