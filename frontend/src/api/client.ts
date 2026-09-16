@@ -78,7 +78,7 @@ export async function submitAnswer(
       session_id: sessionId,
       ...payload
     })
-  }, 15000);
+  }, 25000);
   if (!res.ok) throw new Error('Failed to evaluate answer');
   return res.json();
 }

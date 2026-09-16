@@ -80,6 +80,7 @@ export interface SessionState {
     language: string;
     questions: Question[];
   }) => boolean;
+  setQuestions: (questions: Question[]) => void;
   setHardwareStatus: (status: Partial<HardwareStatus>) => void;
   startQuestion: (index: number) => boolean;
   startRecording: () => boolean;
@@ -224,6 +225,8 @@ export const useSessionStore = create<SessionState>()(
           });
           return true;
         },
+
+        setQuestions: (questions) => set({ questions }),
 
         setHardwareStatus: (status) =>
           set((state) => ({

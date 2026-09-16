@@ -18,7 +18,7 @@ interface InterviewSessionPageProps {
   onCompleteSession: () => void;
 }
 
-const COMMON_FILLERS = ['um', 'uh', 'like', 'basically', 'actually', 'you know', 'sort of'];
+import { countFillers } from '../lib/fillerWords';
 
 /**
  * InterviewSessionPage Component (Screen 2: The Spatial Interview Cockpit)
@@ -53,7 +53,6 @@ export const InterviewSessionPage: React.FC<InterviewSessionPageProps> = ({
     startQuestion,
     startRecording,
     pauseRecording,
-    stopRecording,
     tickTimer,
     setInterimTranscript,
     setFinalTranscript,
@@ -110,6 +109,18 @@ export const InterviewSessionPage: React.FC<InterviewSessionPageProps> = ({
 
   const activeEvaluation = (currentQuestion ? evaluations[currentQuestion.id] : null) || (isFeedback ? sampleEvaluation : null);
 
+  // Diagnostic FSM Stage Logger
+  useEffect(() => {
+    console.log('[FSM] Stage:', stage);
+  }, [stage]);
+
+  // Synchronize questions prop into sessionStore so nextQuestion knows total questions
+  useEffect(() => {
+    if (questions && questions.length > 0) {
+      useSessionStore.setState({ questions });
+    }
+  }, [questions]);
+
   // Mount: initialize question state via FSM & declare active session telemetry
   useEffect(() => {
     if (!isUrlFeedback) {
@@ -153,15 +164,7 @@ export const InterviewSessionPage: React.FC<InterviewSessionPageProps> = ({
             finalized += transcriptChunk;
 
             // Detect fillers in finalized phrase
-            const lower = transcriptChunk.toLowerCase();
-            const foundFillers: Record<string, number> = {};
-            for (const filler of COMMON_FILLERS) {
-              const regex = new RegExp(`\\b${filler}\\b`, 'gi');
-              const matches = lower.match(regex);
-              if (matches) {
-                foundFillers[filler] = matches.length;
-              }
-            }
+            const { counts: foundFillers } = countFillers(transcriptChunk);
             if (Object.keys(foundFillers).length > 0) {
               updateFillerCounts(foundFillers);
             }
@@ -304,15 +307,22 @@ export const InterviewSessionPage: React.FC<InterviewSessionPageProps> = ({
       }
     }, 1000);
 
-    let resolvedTranscript = `${finalTranscript} ${interimTranscript}`.trim();
+    // Read latest transcript from store (avoids stale closure when JS injects transcript late)
+    const currentState = useSessionStore.getState();
+    let resolvedTranscript = `${currentState.finalTranscript} ${currentState.interimTranscript}`.trim();
 
     try {
       if (audioChunksRef.current.length > 0) {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        audioChunksRef.current = [];
         const sttRes = await transcribeSessionAudio(sessionId, audioBlob, language);
         if (sttRes?.transcript && sttRes.transcript.trim().length > 0) {
-          resolvedTranscript = sttRes.transcript.trim();
-          setFinalTranscript(resolvedTranscript);
+          const sttWords = sttRes.transcript.trim().split(/\s+/).filter(Boolean);
+          const currentWords = resolvedTranscript.split(/\s+/).filter(Boolean);
+          if (sttWords.length >= currentWords.length || currentWords.length < 5) {
+            resolvedTranscript = sttRes.transcript.trim();
+            setFinalTranscript(resolvedTranscript);
+          }
         }
       } else {
         // Brief async pass so user observes the transcribing state cleanly
@@ -334,6 +344,10 @@ export const InterviewSessionPage: React.FC<InterviewSessionPageProps> = ({
       return;
     }
 
+    // Accurately detect and register filler words from the resolved transcript
+    const { counts: detectedFillers, total: detectedFillerTotal } = countFillers(resolvedTranscript);
+    updateFillerCounts(detectedFillers);
+
     // Stage 2: ANALYZING (LLM / Rubric Evaluation with 8s warning threshold)
     setAnalyzing();
     const analyzeStart = Date.now();
@@ -353,6 +367,7 @@ export const InterviewSessionPage: React.FC<InterviewSessionPageProps> = ({
         duration_seconds: durationSeconds,
         language,
         confidence_score: visionTelemetry.confidence || 88,
+        audio_filler_count: detectedFillerTotal,
       });
 
       clearInterval(analyzeTimer);
@@ -361,7 +376,7 @@ export const InterviewSessionPage: React.FC<InterviewSessionPageProps> = ({
     } catch (err) {
       clearInterval(analyzeTimer);
       setWarningMessage(null);
-      console.error('[Session] Evaluation failed, using local rubric fallback:', err);
+      console.warn('[Session] Evaluation notice, using local rubric fallback:', err);
       // Fallback robust evaluation payload based on actual transcript
       const mockEvaluation: QuestionEvaluation = {
         question_id: currentQuestion.id,
@@ -373,8 +388,8 @@ export const InterviewSessionPage: React.FC<InterviewSessionPageProps> = ({
         content_score: 82,
         words_count: words.length,
         wpm: Math.round((words.length / (durationSeconds / 60))),
-        filler_words: useSessionStore.getState().fillerCounts,
-        filler_total: Object.values(useSessionStore.getState().fillerCounts).reduce((a, b) => a + b, 0),
+        filler_words: detectedFillers,
+        filler_total: detectedFillerTotal,
         clarity_score: 85,
         confidence_score: visionTelemetry.confidence || 88,
         overall_question_score: 83,

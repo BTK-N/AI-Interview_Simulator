@@ -3,6 +3,7 @@ import { Header } from './components/layout/Header';
 import { HomePage } from './pages/HomePage';
 import type { Question } from './types';
 import { startSession, fetchSessionQuestions } from './api/client';
+import { useSessionStore } from './store/sessionStore';
 import { CockpitLoadingSkeleton } from './components/ui/CockpitLoadingSkeleton';
 
 const InterviewSessionPage = React.lazy(() =>
@@ -111,6 +112,13 @@ export const App: React.FC = () => {
       setRoleTitle(sessionData.role_title);
       setSessionLanguage(language);
       setQuestions(sessionQuestions);
+      useSessionStore.getState().initSession({
+        sessionId: sessionData.session_id,
+        roleId,
+        roleTitle: sessionData.role_title,
+        language,
+        questions: sessionQuestions,
+      });
       setCurrentView('interview');
     } catch (err) {
       console.warn("Backend unavailable, initializing diagnostic simulation session:", err);
@@ -125,6 +133,13 @@ export const App: React.FC = () => {
       setRoleTitle(fallbackTitle);
       setSessionLanguage(language);
       setQuestions(FALLBACK_QUESTIONS);
+      useSessionStore.getState().initSession({
+        sessionId: 'sess-sim-cockpit-alpha',
+        roleId,
+        roleTitle: fallbackTitle,
+        language,
+        questions: FALLBACK_QUESTIONS,
+      });
       setCurrentView('interview');
     } finally {
       setIsLoading(false);

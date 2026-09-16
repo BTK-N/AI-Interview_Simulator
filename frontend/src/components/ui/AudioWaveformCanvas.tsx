@@ -154,7 +154,6 @@ export const AudioWaveformCanvas: React.FC<AudioWaveformCanvasProps> = ({
       gradient.addColorStop(1, '#10B981'); // Arctic Mint
 
       const idleColor = 'rgba(255, 255, 255, 0.12)';
-      const midY = h / 2;
 
       if (reducedMotion) {
         // Reduced Motion: Draw steady, calm harmonic line without high-frequency flashing

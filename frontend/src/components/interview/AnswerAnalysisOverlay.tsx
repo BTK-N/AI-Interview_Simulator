@@ -18,15 +18,7 @@ interface FillerTokenMeta {
   suggestion: string;
 }
 
-const COMMON_FILLERS: Record<string, string> = {
-  um: 'Replace vocalized pauses with silent breath pauses. Silence signals executive command.',
-  uh: 'Deliberate cadence and structured breathing eliminate hesitation markers.',
-  like: 'State assertions directly without comparative hedging ("like", "sort of").',
-  basically: 'Eliminate meta-commentary. Lead with concrete architectural mechanisms.',
-  actually: 'Drop conversational intensifiers; present technical rationale assertively.',
-  'you know': 'Assume the interviewer understands fundamentals; focus on trade-off nuances.',
-  'sort of': 'Provide exact system bounds and metrics rather than approximate qualifiers.',
-};
+import { COMMON_FILLERS } from '../../lib/fillerWords';
 
 /**
  * AnswerAnalysisOverlay Component (Screen 3)
@@ -121,6 +113,10 @@ export const AnswerAnalysisOverlay: React.FC<AnswerAnalysisOverlayProps> = ({
       };
     });
   }, [evaluation.transcript]);
+
+  const fillerChipsCount = useMemo(() => {
+    return parsedTranscriptTokens.filter((t) => t.isFiller).length;
+  }, [parsedTranscriptTokens]);
 
   // Sync initial selected filler word when popover query param is present
   useEffect(() => {
@@ -262,7 +258,7 @@ export const AnswerAnalysisOverlay: React.FC<AnswerAnalysisOverlayProps> = ({
               </span>
               <span className="text-white/20">•</span>
               <span className="text-coral-alert font-semibold">
-                {evaluation.filler_total ?? Object.keys(evaluation.filler_words || {}).length} FILLERS DETECTED
+                {fillerChipsCount} FILLERS DETECTED
               </span>
             </div>
           </div>
