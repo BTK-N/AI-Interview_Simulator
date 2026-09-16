@@ -34,9 +34,23 @@ def evaluate_with_local_heuristic(
     Guarantees the live interview demo never crashes even under zero connectivity.
     Scores relevance, completeness (rubric keyword hit-ratio), and STAR structural markers.
     """
-    words = re.findall(r'\b[a-zA-Z0-9_\-\']+\b', transcript.lower())
-    transcript_text = " ".join(words)
-    word_count = len(words)
+    # A) Guard clause for insufficient input (< 5 words)
+    words = transcript.strip().split()
+    if len(words) < 5:
+        return {
+            'relevance_score': 0.0,
+            'completeness_score': 0.0,
+            'structure_score': 0.0,
+            'content_score': 0.0,
+            'feedback': 'No substantive answer detected. Please record a full response.',
+            'strengths': [],
+            'improvement_tips': ['Provide a complete answer to the question.'],
+            'model_used': 'insufficient_input'
+        }
+
+    words_clean = re.findall(r'\b[a-zA-Z0-9_\-\']+\b', transcript.lower())
+    transcript_text = " ".join(words_clean)
+    word_count = len(words_clean)
     
     # 1. Keyword & Expected Points Semantic Matching
     stopwords = {
@@ -57,7 +71,12 @@ def evaluate_with_local_heuristic(
         if not pt_words:
             matched_points.append(pt)
             continue
-        match_count = sum(1 for w in pt_words if w in transcript_text)
+        # Stemming-tolerant matching (e.g. bundle/bundles, method/methods)
+        match_count = 0
+        for w in pt_words:
+            stem = w[:4] if len(w) >= 4 else w
+            if any(stem in tw for tw in words_clean):
+                match_count += 1
         match_ratio = match_count / max(1, len(pt_words))
         if match_ratio >= 0.30:
             matched_points.append(pt)
@@ -65,22 +84,30 @@ def evaluate_with_local_heuristic(
             missed_points.append(pt)
             
     hit_ratio = len(matched_points) / max(1, total_rubric_points)
-    comp = min(9.5, max(3.5, hit_ratio * 9.5))
+    # B) Remove artificial floors: max(0.0, ...)
+    comp = min(10.0, max(0.0, hit_ratio * 10.0))
     
     # 2. Relevance Scoring
     q_words = [w for w in re.findall(r'\b[a-zA-Z0-9_\-\']+\b', question_text.lower()) if w not in stopwords and len(w) > 3]
-    q_overlap = sum(1 for w in q_words if w in transcript_text) / max(1, len(q_words)) if q_words else 0.5
-    
-    if word_count < 15:
-        length_factor = 0.35
-    elif word_count < 40:
-        length_factor = 0.65
-    elif word_count < 75:
-        length_factor = 0.85
+    q_overlap = 0
+    if q_words:
+        for qw in q_words:
+            stem = qw[:4] if len(qw) >= 4 else qw
+            if any(stem in tw for tw in words_clean):
+                q_overlap += 1
+        q_overlap_ratio = q_overlap / len(q_words)
     else:
-        length_factor = 0.95
-        
-    rel = min(9.6, max(3.0, (0.4 * q_overlap + 0.6 * length_factor) * 10.0))
+        q_overlap_ratio = 0.5
+    
+    # If both question overlap and rubric match are zero, it is completely off-topic
+    if hit_ratio == 0 and q_overlap_ratio == 0:
+        rel = 0.0
+    else:
+        relevance_signal = max(q_overlap_ratio, hit_ratio * 0.85)
+        if q_overlap_ratio > 0 and hit_ratio > 0:
+            relevance_signal = min(1.0, relevance_signal + 0.1)
+        length_factor = 0.7 if word_count < 10 else 1.0
+        rel = min(10.0, max(0.0, relevance_signal * length_factor * 10.0))
     
     # 3. Structural Progression (STAR / Architectural Grammar)
     premise_markers = ["because", "in our system", "the core concept", "first", "architecture", "designed to", "specifically", "fundamentally"]
@@ -92,14 +119,16 @@ def evaluate_with_local_heuristic(
     has_outcome = any(m in transcript_text for m in outcome_markers)
     
     classes_hit = sum([has_premise, has_mechanism, has_outcome])
-    if classes_hit == 3:
+    if hit_ratio == 0 and rel == 0:
+        struct = 0.0
+    elif classes_hit == 3:
         struct = 9.0
     elif classes_hit == 2:
-        struct = 7.8
+        struct = 7.5
     elif classes_hit == 1:
-        struct = 6.4
+        struct = 5.0
     else:
-        struct = 5.2
+        struct = 2.0
         
     content_100 = round((rel * 0.4 + comp * 0.4 + struct * 0.2) * 10.0, 1)
     
@@ -141,19 +170,18 @@ def evaluate_answer_with_llm(
     Evaluates candidate transcript against question rubric using OpenRouter API (openrouter/free).
     Falls back gracefully to the Local Heuristic Engine on error or timeout.
     """
-    if not transcript or len(transcript.strip().split()) < 3:
+    if not transcript or len(transcript.strip().split()) < 5:
         is_urdu = language == "ur" or bool(re.search(r'[\u0600-\u06FF]', transcript))
         return {
-            "relevance_score": 1.0,
-            "completeness_score": 1.0,
-            "structure_score": 1.0,
-            "content_score": 10.0,
-            "feedback": "جواب بہت مختصر یا ناکافی تھا جس کی بنا پر مکمل جانچ نہیں کی جا سکی۔" if is_urdu else "The answer was too brief or inaudible to evaluate effectively.",
+            "relevance_score": 0.0,
+            "completeness_score": 0.0,
+            "structure_score": 0.0,
+            "content_score": 0.0,
+            "feedback": "جواب بہت مختصر یا ناکافی تھا جس کی بنا پر مکمل جانچ نہیں کی جا سکی۔" if is_urdu else "No substantive answer detected. Please record a full response.",
             "improvement_tips": [
-                "Provide a detailed response addressing the core prompt.",
-                "Structure your thoughts before speaking using the STAR or Definition-Example method."
+                "Provide a complete answer to the question."
             ],
-            "model_used": "local_heuristic_scorer"
+            "model_used": "insufficient_input"
         }
 
     points_bulleted = "\n".join([f"- {p}" for p in expected_points])

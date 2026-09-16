@@ -40,6 +40,7 @@ export const AudioWaveformCanvas: React.FC<AudioWaveformCanvasProps> = ({
   const idlePhaseRef = useRef<number>(0);
   // Persistent reusable buffer allocated ONCE in useRef (zero per-frame allocations)
   const frequencyDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
+  const frameCountRef = useRef<number>(0);
   const reducedMotion = useReducedMotion();
 
   // Set up Audio Context and Analyser when stream arrives
@@ -87,6 +88,13 @@ export const AudioWaveformCanvas: React.FC<AudioWaveformCanvasProps> = ({
     };
   }, [stream]);
 
+  // Ensure AudioContext is resumed when recording begins
+  useEffect(() => {
+    if (isRecording && audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+      audioCtxRef.current.resume().catch((err) => console.warn('[AudioWaveform] resume error:', err));
+    }
+  }, [isRecording]);
+
   // Render loop: requestAnimationFrame with timestamp gating (30fps)
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -120,6 +128,20 @@ export const AudioWaveformCanvas: React.FC<AudioWaveformCanvasProps> = ({
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, width, h);
 
+      // Sample frequency data whenever recording
+      const freqData = frequencyDataRef.current;
+      if (isRecording && analyserRef.current && freqData) {
+        if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+          audioCtxRef.current.resume().catch(() => {});
+        }
+        analyserRef.current.getByteFrequencyData(freqData);
+        frameCountRef.current = (frameCountRef.current || 0) + 1;
+        if (frameCountRef.current % 60 === 0) {
+          const avg = freqData.reduce((a, b) => a + b, 0) / freqData.length;
+          console.log('[Waveform] avg frequency magnitude:', avg, 'ctx state:', audioCtxRef.current?.state);
+        }
+      }
+
       const count = barCount;
       const gap = 3;
       const totalGaps = (count - 1) * gap;
@@ -136,20 +158,21 @@ export const AudioWaveformCanvas: React.FC<AudioWaveformCanvasProps> = ({
 
       if (reducedMotion) {
         // Reduced Motion: Draw steady, calm harmonic line without high-frequency flashing
-        ctx.strokeStyle = isRecording ? '#F59E0B' : idleColor;
-        ctx.lineWidth = 2;
+        const avg = (isRecording && freqData) ? (freqData.reduce((a, b) => a + b, 0) / freqData.length) : 0;
+        const norm = Math.min(1, avg / 128);
+        const barHeight = isRecording ? Math.max(4, norm * (h - 12)) : 4;
+        const y = (h - barHeight) / 2;
+
+        ctx.fillStyle = isRecording ? gradient : idleColor;
         ctx.beginPath();
-        ctx.moveTo(0, midY);
-        ctx.lineTo(width, midY);
-        ctx.stroke();
+        if (ctx.roundRect) {
+          ctx.roundRect(width * 0.05, y, width * 0.9, barHeight, 4);
+        } else {
+          ctx.rect(width * 0.05, y, width * 0.9, barHeight);
+        }
+        ctx.fill();
         ctx.restore();
         return;
-      }
-
-      // Re-use pre-allocated buffer from useRef
-      const freqData = frequencyDataRef.current;
-      if (isRecording && analyserRef.current && freqData) {
-        analyserRef.current.getByteFrequencyData(freqData);
       }
 
       // Increment idle wave phase

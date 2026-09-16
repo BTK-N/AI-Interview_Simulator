@@ -545,7 +545,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ sessionId = 'sess-sim-ex
 
               return (
                 <div
-                  key={qResult.question_id || idx}
+                  key={`${qResult.question_id || 'q'}-${idx}`}
                   className="rounded-2xl bg-surface-panel border border-border-default overflow-hidden transition-all shadow-md"
                 >
                   {/* Accordion Row Header Button */}

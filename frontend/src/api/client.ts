@@ -71,14 +71,14 @@ export async function submitAnswer(
     audio_filler_count?: number;
   }
 ): Promise<QuestionEvaluation> {
-  const res = await fetch(`${API_BASE}/sessions/${sessionId}/evaluate`, {
+  const res = await fetchWithTimeout(`${API_BASE}/sessions/${sessionId}/evaluate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       session_id: sessionId,
       ...payload
     })
-  });
+  }, 15000);
   if (!res.ok) throw new Error('Failed to evaluate answer');
   return res.json();
 }
@@ -90,11 +90,11 @@ export async function analyzeWebcamFrame(imageBase64: string): Promise<{
   is_smiling?: boolean;
 }> {
   try {
-    const res = await fetch(`${API_BASE}/vision/analyze-frame`, {
+    const res = await fetchWithTimeout(`${API_BASE}/vision/analyze-frame`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ image_base64: imageBase64 })
-    });
+    }, 4000);
     if (!res.ok) throw new Error('Vision analysis request failed');
     return res.json();
   } catch (err) {
@@ -111,10 +111,10 @@ export async function transcribeAudio(audioBlob: Blob, language: string = 'en'):
   formData.append('audio_file', audioBlob, 'response.webm');
   formData.append('language', language);
 
-  const res = await fetch(`${API_BASE}/speech/transcribe`, {
+  const res = await fetchWithTimeout(`${API_BASE}/speech/transcribe`, {
     method: 'POST',
     body: formData
-  });
+  }, 15000);
   if (!res.ok) throw new Error('Speech transcription failed');
   return res.json();
 }
@@ -128,10 +128,10 @@ export async function transcribeSessionAudio(sessionId: string, audioBlob: Blob,
   formData.append('audio_file', audioBlob, 'response.webm');
   formData.append('language', language);
 
-  const res = await fetch(`${API_BASE}/sessions/${sessionId}/transcribe`, {
+  const res = await fetchWithTimeout(`${API_BASE}/sessions/${sessionId}/transcribe`, {
     method: 'POST',
     body: formData
-  });
+  }, 15000);
   if (!res.ok) throw new Error('Session speech transcription failed');
   return res.json();
 }

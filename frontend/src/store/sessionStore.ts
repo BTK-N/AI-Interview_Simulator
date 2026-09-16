@@ -83,6 +83,7 @@ export interface SessionState {
   setHardwareStatus: (status: Partial<HardwareStatus>) => void;
   startQuestion: (index: number) => boolean;
   startRecording: () => boolean;
+  pauseRecording: () => boolean;
   stopRecording: () => boolean;
   tickTimer: () => void;
   setTimerSeconds: (seconds: number) => void;
@@ -248,14 +249,18 @@ export const useSessionStore = create<SessionState>()(
         },
 
         startRecording: () => {
-          const success = get().transitionTo('recording');
-          if (!success) return false;
+          const currentStage = get().stage;
+          if (currentStage !== 'recording') {
+            const success = get().transitionTo('recording');
+            if (!success) return false;
+          }
 
-          set({
-            isTimerPaused: false,
-            interimTranscript: '',
-            finalTranscript: '',
-          });
+          set({ isTimerPaused: false });
+          return true;
+        },
+
+        pauseRecording: () => {
+          set({ isTimerPaused: true });
           return true;
         },
 
@@ -420,3 +425,8 @@ export const useSessionStore = create<SessionState>()(
     { name: 'InterviewSessionFSM' }
   )
 );
+
+if (typeof window !== 'undefined') {
+  (window as any).__sessionStore = useSessionStore;
+}
+

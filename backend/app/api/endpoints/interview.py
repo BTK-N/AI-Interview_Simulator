@@ -184,24 +184,43 @@ def submit_answer(
     # Combine improvement tips
     combined_tips = llm_res.get("improvement_tips", []) + speech_res.get("speech_tips", [])
     
-    # Save Answer to DB
-    db_ans = DBAnswer(
-        session_id=session_id,
-        question_id=sub.question_id,
-        question_text=q_data["question"],
-        transcript=sub.transcript,
-        duration_seconds=sub.duration_seconds,
-        relevance_score=llm_res["relevance_score"],
-        completeness_score=llm_res["completeness_score"],
-        structure_score=llm_res["structure_score"],
-        content_score=llm_res["content_score"],
-        clarity_score=speech_res["clarity_score"],
-        confidence_score=confidence,
-        overall_score=overall_q_score,
-        feedback=llm_res["feedback"],
-        improvement_tips=json.dumps(combined_tips)
-    )
-    db.add(db_ans)
+    # Save or update Answer in DB (idempotent per question_id)
+    db_ans = db.query(DBAnswer).filter(
+        DBAnswer.session_id == session_id,
+        DBAnswer.question_id == sub.question_id
+    ).first()
+
+    if db_ans:
+        db_ans.question_text = q_data["question"]
+        db_ans.transcript = sub.transcript
+        db_ans.duration_seconds = sub.duration_seconds
+        db_ans.relevance_score = llm_res["relevance_score"]
+        db_ans.completeness_score = llm_res["completeness_score"]
+        db_ans.structure_score = llm_res["structure_score"]
+        db_ans.content_score = llm_res["content_score"]
+        db_ans.clarity_score = speech_res["clarity_score"]
+        db_ans.confidence_score = confidence
+        db_ans.overall_score = overall_q_score
+        db_ans.feedback = llm_res["feedback"]
+        db_ans.improvement_tips = json.dumps(combined_tips)
+    else:
+        db_ans = DBAnswer(
+            session_id=session_id,
+            question_id=sub.question_id,
+            question_text=q_data["question"],
+            transcript=sub.transcript,
+            duration_seconds=sub.duration_seconds,
+            relevance_score=llm_res["relevance_score"],
+            completeness_score=llm_res["completeness_score"],
+            structure_score=llm_res["structure_score"],
+            content_score=llm_res["content_score"],
+            clarity_score=speech_res["clarity_score"],
+            confidence_score=confidence,
+            overall_score=overall_q_score,
+            feedback=llm_res["feedback"],
+            improvement_tips=json.dumps(combined_tips)
+        )
+        db.add(db_ans)
     db.commit()
     
     return QuestionEvaluation(
